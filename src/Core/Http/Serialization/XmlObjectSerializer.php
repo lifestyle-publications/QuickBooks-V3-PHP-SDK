@@ -219,9 +219,9 @@ class XmlObjectSerializer extends IEntitySerializer
 
         /**
      * DeSerializes the specified action entity type.
-     * @param message The type to be  serialize to
-     * @param bLimitToOne Limit to parsing just one response element
-     * @return object Returns the de serialized object.
+     * @param string $message The type to be  serialize to
+     * @param bool $bLimitToOne Limit to parsing just one response element
+     * @return mixed Returns the de serialized object(s)
      */
     public function Deserialize($message, $bLimitToOne = false)
     {
@@ -233,6 +233,12 @@ class XmlObjectSerializer extends IEntitySerializer
         $resultObjects = null;
 
         $responseXmlObj = simplexml_load_string($message);
+
+        // handle count(*) style queries
+        if (isset($responseXmlObj->attributes()['totalCount']) && !isset($responseXmlObj->attributes()['startPosition'])) {
+            return (int) $responseXmlObj->attributes()['totalCount'];
+        }
+        
         foreach ($responseXmlObj as $oneXmlObj) {
             $oneXmlElementName = (string)$oneXmlObj->getName();
 
